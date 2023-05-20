@@ -3,3 +3,5 @@ pip install Flask
 pip install dnspython # per risolvere l'indirizzo del db
 npm install -g --force nodemon
 pip install flask-cors
+pip install geojson
+pip install shapely
