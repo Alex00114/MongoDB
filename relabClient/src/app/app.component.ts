@@ -24,7 +24,12 @@ export class AppComponent implements AfterViewInit {
   obsCiVett!: Observable<Ci_vettore[]>; //Crea un observable per ricevere i vettori energetici
   markerList!: google.maps.MarkerOptions[];
 
-  constructor(public http: HttpClient) { }
+  circleCenter!: google.maps.LatLngLiteral;
+  circleOptions!: any;
+
+  constructor(public http: HttpClient) { 
+    this.circleOptions =  {fillColor : 'red', clickable : true, editable : true}
+  }
   
   ngAfterViewInit(): void {
     
@@ -39,9 +44,7 @@ export class AppComponent implements AfterViewInit {
  //Una volta che la pagina web è caricata, viene lanciato il metodo ngOnInit scarico i    dati 
   //dal server
   ngOnInit() {
-    //Effettua la chiamatata al server per ottenere l’elenco dei vettori energetici
-    this.obsCiVett = this.http.get<Ci_vettore[]>("https://5000-alex00114-mongodb-lv0f6f714tr.ws-eu97.gitpod.io/ci_vettore/113");
-    this.obsCiVett.subscribe(this.prepareCiVettData);
+
   }
 
   prepareCiVettData = (data: Ci_vettore[]) => {
@@ -58,6 +61,16 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
+  //Questo metodo richiama la route sul server che recupera il foglio specificato nella casella di testo
+  cambiaFoglio(foglio : any)
+  {
+    let val = foglio.value; //Commenta qui
+    this.obsCiVett = this.http.get<Ci_vettore[]>(`https://5000-alex00114-mongodb-lv0f6f714tr.ws-eu97.gitpod.io/ci_vettore/${val}`);  //prende il valore inserito dall'utente e lo aggiunge alla fine dell'url
+    this.obsCiVett.subscribe(this.prepareCiVettData); //Commenta qui
+    console.log(val);
+    return false;
+  }
+
   findImage(label: string) : google.maps.Icon {
     if (label.includes("Gas")) {
       return { url: './assets/img/gas-16.ico', scaledSize: new google.maps.Size(32,32) };
@@ -67,5 +80,16 @@ export class AppComponent implements AfterViewInit {
     }
     //Se non viene riconosciuta nessuna etichetta ritorna l'icona undefined
       return {url: '.assets/img/map-marker-2-16.ico', scaledSize: new google.maps.Size(32,32)}
+  }
+
+  //Aggiungi il gestore del metodo mapClicked
+  mapClicked($event: google.maps.MapMouseEvent) {
+    console.log($event);
+    let coords= $event.latLng; //Queste sono le coordinate cliccate
+    if (coords != null) {
+      this.center = { lat: coords.lat(), lng: coords.lng() };
+      this.circleCenter = { lat: coords.lat(), lng: coords.lng() };
+    }
+    
   }
 }
